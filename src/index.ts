@@ -4,6 +4,7 @@ import {
   type ObjectCannedACL,
   S3,
 } from '@aws-sdk/client-s3'
+import {NotFoundError, InternalServerError} from '@tryghost/errors';
 import StorageBase, { type ReadOptions, type Image } from 'ghost-storage-base'
 import { join } from 'path'
 import { createReadStream } from 'fs'
@@ -197,8 +198,15 @@ class S3Storage extends StorageBase {
         const stream = output.Body as Readable
         stream.pipe(res)
       } catch (err) {
-        res.status(404)
-        next(err)
+        if (err.name === 'NoSuchKey') {        
+          return next(new NotFoundError({
+            message: "Not found",
+            code: 'FILE_NOT_FOUND',
+            property: err.path
+          }));
+        } else {
+          return next(new InternalServerError({err: err}));
+        }
       }
     }
   }
