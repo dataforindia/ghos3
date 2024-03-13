@@ -91,8 +91,7 @@ class S3Storage extends StorageBase {
     this.endpoint =
       process.env.GHOST_STORAGE_ADAPTER_S3_ENDPOINT || endpoint || ''
     this.acl = (process.env.GHOST_STORAGE_ADAPTER_S3_ACL ||
-      acl ||
-      'public-read') as ObjectCannedACL
+      acl) as ObjectCannedACL
   }
 
   async delete(fileName: string, targetDir?: string) {
@@ -157,12 +156,14 @@ class S3Storage extends StorageBase {
     const file = createReadStream(image.path)
 
     let config: PutObjectCommandInput = {
-      ACL: this.acl,
       Body: file,
       Bucket: this.bucket,
       CacheControl: `max-age=${30 * 24 * 60 * 60}`,
       ContentType: image.type,
       Key: stripLeadingSlash(fileName),
+    }
+    if (this.acl) {
+      config.ACL = this.acl
     }
     await this.s3().putObject(config)
 

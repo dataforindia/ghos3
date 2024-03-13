@@ -1,3 +1,7 @@
+#### Changes in this fork
+* Doesn't default to "public-read" ACL
+* Doesn't set ACL if it is not explicitly set, useful when the bucket is public or behind cloudfront. No need to give the additional ACL permissions when not needed.
+
 # GhoS3
 
 An AWS S3 storage adapter tested on Ghost 5.x.
